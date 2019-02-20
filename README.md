@@ -18,6 +18,10 @@ Library has a global instance for ./config.js. xfConfig
 
 To not use the global instance: use xfConfigClass(filename)
 
+### Dependencies
+* FS from ESP8266 Core - https://github.com/esp8266/Arduino
+* ArduinoJson - https://arduinojson.org
+
 ### Usage - struct serialization
 
 ```
@@ -61,5 +65,27 @@ json["someText"] = "NewText";
 json["someNumber"] = 10;
 
 xfConfig.saveConfigFromJson(json);
+
+```
+
+
+## xfOTA
+Wrapper for ArduinoOTA. Purpose is to have two oneliners to enable OTA. 
+For more documentation see ArduinoOTA.
+
+### Dependencies
+
+* ArduinoOTA from ESP8266 Core - https://github.com/esp8266/Arduino
+
+### Usage
+```
+    // Declare and instansiate
+    xfOTA ota;
+
+    // Setup OTA
+    ota.setup("ESP8266", "otapassword");
+
+    // In loop() 
+    ota.loop();
 
 ```
