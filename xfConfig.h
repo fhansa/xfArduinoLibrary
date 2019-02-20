@@ -1,5 +1,6 @@
-/*
- *  xfConfig.h
+/*  xfArduinoLibrary - xfConfig
+ *  Copyright Fredrik Santander 2019
+ *  MIT License
  * 
  *      Configuration for ESP8266. 
  *      Library makes it possible to store and retrieve configuration. 

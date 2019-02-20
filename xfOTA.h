@@ -1,5 +1,6 @@
-/*
- *  xfOTA.h
+/*  xfArduinoLibrary - xfOTA
+ *  Copyright Fredrik Santander 2019
+ *  MIT License
  * 
  *  Contains helper methods to setup ArduinoOTA. 
  *  Purpose is to setup and use OTA with two single line calls. 
