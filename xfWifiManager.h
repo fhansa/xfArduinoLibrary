@@ -17,6 +17,10 @@
 #define  XFMQTTCONFIGFILE "/mqttconfig.json"        // Name of config file to store mqtt-settings
 #define  DEFAULT_WIFI_PORT 8990                     // Portnumber for wifi reset commando
 
+#define MAX_LEN_DHCP    10
+#define MAX_LEN_IPADR   20
+
+
 class xfWifiManager {
     protected:
         // Access point name and password
@@ -29,6 +33,9 @@ class xfWifiManager {
         char *m_mqttPort;
         char *m_mqttUsername;
         char *m_mqttPassword;
+        char m_dhcp[MAX_LEN_DHCP];
+        char m_staticIp[MAX_LEN_IPADR];
+        char m_staticGateway[MAX_LEN_IPADR];
 
         // WifiServer to enable wifi-reset
         WiFiServer *m_wifiServer;
@@ -36,7 +43,7 @@ class xfWifiManager {
     public:
         // Constructor, 
         //      Take Access Point credentials and flag indicating if mqtt should be configured or not as input
-        xfWifiManager(char *apName, char *apPwd, bool configMQTT);
+        xfWifiManager(char *apName, char *apPwd, bool configMQTT, bool allowStaticIp = true);
 
         // Getter and setters for mqtt
         char *mqttServer();
@@ -47,12 +54,17 @@ class xfWifiManager {
         void setMqttPort(const char *port);
         void setMqttUsername(const char *username);
         void setMqttPassword(const char *password);
-        void saveMQTTConfiguration();
 
+        void setDHCP(const char *dhcp);
+        void setStaticIp(const char *staticIp);
+        void setStaticGateway(const char *staticGateway);
+
+        void saveConfiguration();
+        void readConfiguration();
 
         // Turn on and off wifi reset
         void allowReset(bool allow);
-      
+        bool allowStaticIp;
         // Setup WiFi
         bool setupWifi(bool forceAP = false);
         void resetWifi();

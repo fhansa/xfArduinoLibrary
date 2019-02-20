@@ -2,6 +2,7 @@
 
 // Global instance 
 xfConfigClass xfConfig(XFCONFIG_DEFAULT_FILENAME);
+StaticJsonBuffer<512> jsonBuffer;
 
 // 
 //  Create error json object
@@ -13,24 +14,18 @@ JsonObject &xfConfigClass::errorJson() {
     return error;
 }
 
+//
+// Constructor 
+//
 xfConfigClass::xfConfigClass(char *filename) {
   strlcpy(m_filename, filename, 49);
 }
+
 //
 //  Read Config.json (local file) into variables 
 //
-JsonObject &xfConfigClass::readConfig() {
-  // 
-  /*Serial.println("FILESYSTEM");
-  Dir dir = SPIFFS.openDir("/");
-  while (dir.next()) {
-      Serial.print(dir.fileName());
-      if(dir.fileSize()) {
-          File f = dir.openFile("r");
-          Serial.println(f.size());
-      }
-  }
-  */
+JsonObject &xfConfigClass::readConfigAsJson() {
+
   Serial.println("Reading configuration");
   Serial.println(m_filename);
   if(!SPIFFS.begin()) {
@@ -66,10 +61,9 @@ JsonObject &xfConfigClass::readConfig() {
 }
 
 //
-//  Save config for extra parameters 
-//  WifiMgr handles the WiFi.stuff
+//  Save config 
 //
-void xfConfigClass::saveConfig(JsonObject &json) {
+void xfConfigClass::saveConfigFromJson(JsonObject &json) {
     Serial.println("Saving config");
     File configFile = SPIFFS.open(m_filename, "w");
     if (!configFile) {

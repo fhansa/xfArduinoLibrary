@@ -7,7 +7,7 @@
  *  Usage:
  * 
  *      call xfOta.setup(hostname, password, port) from setup
- *      Call xfOta.OTALoop from Loop
+ *      call xfOta.OTALoop from Loop
  * 
  *  TODO:
  *    - extend logging
@@ -26,7 +26,7 @@ class xfOTA {
     // Flag to log OTA to Serial or not
     bool logToSerial; 
 
-    // setup OTA
+    // setup OTA by supplying hostname and password
     void setupOTA(char *hostname, char *password, int port = 6266);
     
     // Always call this from arduino loop()

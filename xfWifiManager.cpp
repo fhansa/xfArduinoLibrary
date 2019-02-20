@@ -5,7 +5,7 @@
 
  bool saveConfig = false;
 
-xfWifiManager::xfWifiManager(char *apName, char *apPwd, bool configMQTT)
+xfWifiManager::xfWifiManager(char *apName, char *apPwd, bool configMQTT, bool allowStaticIp)
 : m_mqttServer(NULL),
   m_mqttPort(NULL),
   m_mqttUsername(NULL),
@@ -15,7 +15,19 @@ xfWifiManager::xfWifiManager(char *apName, char *apPwd, bool configMQTT)
     strcpy(this->ap_name, apName);
     strcpy(this->ap_pwd, apPwd);
     this->m_configMQTT = configMQTT;
+    this->allowStaticIp = allowStaticIp;
     saveConfig = false;
+}
+
+
+void xfWifiManager::setDHCP(const char *dhcp) {
+    strlcpy(m_dhcp, dhcp, MAX_LEN_DHCP);
+}
+void xfWifiManager::setStaticIp(const char *staticIp) {
+    strlcpy(m_staticIp, staticIp, MAX_LEN_IPADR);
+}
+void xfWifiManager::setStaticGateway(const char *staticGateway) {
+    strlcpy(m_staticGateway, staticGateway, MAX_LEN_IPADR);
 }
 
 void xfWifiManager::setMqttServer(const char *server) {
@@ -67,6 +79,40 @@ char *xfWifiManager::mqttPassword() {
     return m_mqttPassword;
 }
 
+void xfWifiManager::readConfiguration() {
+    xfConfigClass config(XFMQTTCONFIGFILE);
+    JsonObject &j = config.readConfigAsJson();
+
+    setMqttServer(j["mqttServer"] | " ");
+    setMqttPort(j["mqttPort"] | " ");
+    setMqttUsername(j["mqttUsername"] | " ");
+    setMqttPassword(j["mqttPassword"] | " ");  
+
+    setDHCP(j["DHCP"] | "Y");
+    setStaticIp(j["staticIp"] | "");
+    setStaticGateway(j["staticGateway"] | "");
+
+    Serial.print("Server"); Serial.println(m_mqttServer);
+    Serial.print("Port"); Serial.println(m_mqttPort);
+    Serial.print("User"); Serial.println(m_mqttUsername);
+    Serial.print("Pwd"); Serial.println(m_mqttPassword);
+}
+
+void xfWifiManager::saveConfiguration() {
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
+    json["mqttServer"] = m_mqttServer;
+    json["mqttPort"] = m_mqttPort;
+    json["mqttUsername"] = m_mqttUsername;
+    json["mqttPassword"] =  m_mqttPassword;
+    json["DHCP"] = m_dhcp;
+    json["staticIp"] = m_staticIp;
+    json["staticGateway"] = m_staticGateway;
+
+    xfConfigClass config(XFMQTTCONFIGFILE);
+    config.saveConfigFromJson(json);
+}
+
 //
 // WifiManager - Setup networking
 //
@@ -76,18 +122,15 @@ bool xfWifiManager::setupWifi(bool forceAP) {
     saveConfig = false;
     wifiMgr.setSaveConfigCallback([]() { saveConfig = true; } );
 
-    xfConfigClass config(XFMQTTCONFIGFILE);
-    JsonObject &j = config.readConfig();
+    this->readConfiguration();
 
-    j.printTo(Serial);
-    
-    setMqttServer(j["mqttServer"] | "");
-    setMqttPort(j["mqttPort"] | "");
-    setMqttUsername(j["mqttUsername"] | "");
-    setMqttPassword(j["mqttPassword"] | "");    
     //
     //  Adding extra parameters for the setup screen
     //
+    WiFiManagerParameter param_dhcp("DHCP", "DHCP", m_dhcp, 10);
+    WiFiManagerParameter param_static_ip("staticip", "static ip", m_staticIp, 20);
+    WiFiManagerParameter param_static_gateway("gateway", "static gateway", m_staticGateway, 20);
+
     WiFiManagerParameter param_mqtt_server("server", "mqtt server", m_mqttServer, 50);
     WiFiManagerParameter param_mqtt_port("port", "mqtt port", m_mqttPort, 6);
     WiFiManagerParameter param_mqtt_username("user", "mqtt username", m_mqttUsername, 25);
@@ -98,13 +141,18 @@ bool xfWifiManager::setupWifi(bool forceAP) {
         wifiMgr.addParameter(&param_mqtt_username);
         wifiMgr.addParameter(&param_mqtt_password);
     }
-    Serial.println("Use");
 
+    if(this->allowStaticIp) {
+        wifiMgr.addParameter(&param_dhcp);
+        wifiMgr.addParameter(&param_static_ip);
+        wifiMgr.addParameter(&param_static_gateway);
+    }
 
     // 
     //  Do the autoconnect magic....
     //
     if(forceAP) {
+        Serial.println("Entering setup mode");
         if (!wifiMgr.startConfigPortal(ap_name, ap_pwd)) {
             Serial.println("failed to connect and hit timeout");
             delay(3000);
@@ -112,6 +160,16 @@ bool xfWifiManager::setupWifi(bool forceAP) {
             delay(5000);
         }
     } else {
+        Serial.println(m_dhcp);
+        if(this->allowStaticIp && strcmp(m_dhcp, "N") == 0) {
+            Serial.println("Using static IP");
+            IPAddress _ip, _gw, _sn;
+            _ip.fromString(m_staticIp);
+            _gw.fromString(m_staticGateway);
+            _sn.fromString("255.255.255.0");
+            wifiMgr.setSTAStaticIPConfig(_ip, _gw, _sn);
+        }
+
         if(!wifiMgr.autoConnect(ap_name, ap_pwd)) {
             Serial.println("failed to connect and hit timeout");
             delay(3000);
@@ -128,29 +186,23 @@ bool xfWifiManager::setupWifi(bool forceAP) {
         setMqttPort(param_mqtt_port.getValue());
         setMqttUsername(param_mqtt_username.getValue());
         setMqttPassword(param_mqtt_password.getValue()); 
-
-        saveMQTTConfiguration();
-
       }
-  }
 
-  Serial.println("local ip");
-  Serial.println(WiFi.localIP());
+      if(this->allowStaticIp) {
+        setDHCP(param_dhcp.getValue());
+        setStaticIp(param_static_ip.getValue());
+        setStaticGateway(param_static_gateway.getValue());
+      }
+
+      saveConfiguration();
+
+    }
+
+
+    Serial.println("local ip");
+    Serial.println(WiFi.localIP());
 }
 
-
-
-void xfWifiManager::saveMQTTConfiguration() {
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-    json["mqttServer"] = m_mqttServer;
-    json["mqttPort"] = m_mqttPort;
-    json["mqttUsername"] = m_mqttUsername;
-    json["mqttPassword"] =  m_mqttPassword;
-
-    xfConfigClass config(XFMQTTCONFIGFILE);
-    config.saveConfig(json);
-}
 //
 // Handle WebServer-call
 //
