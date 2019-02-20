@@ -9,29 +9,6 @@
  *      Library contains a global object named xfConfig to access an instance 
  *      using the default filename (config.js)
  * 
- *  Usage:
- *      Global object:
- *          // To read config into a JsonObject
- *          JsonObject &config = xfConfig.readConfig(); 
- *          
- *          // To save config
- *          xfConfig.saveConfig(config);
- * 
- *      Local object 
- *          xfConfigClass cnf("filename.js");
- *          cnf.saveConfig(config);
- * 
- *      Serialize to and from struct
- *          struct config_t {
- *              String  text;
- *              int     number;
- * 
- *              XF_CONFIG(
- *                  XF_CONFIGITEM(text, "DEFAULT VALUE")
- *                  XF_CONFIGITEM(number, 1)
- *              );
- *          };    
- *   
  *  TODO:
  *      - optimize memory allocation for ArduinoJson-buffer and filename 
  *      - enable logging to other than serialized
@@ -67,11 +44,8 @@ extern StaticJsonBuffer<512> jsonBuffer;
     handleJson(json, 0); \
     return json; \  
   }; \
-
-  
 #define XF_CONFIGITEM(member, defaultValue) \
   if (mode == 1) { member = json[#member].success() ? json[#member].as<decltype(member)>() : defaultValue; } else { json[#member] = member; } 
-
 
 #define XFCONFIG_DEFAULT_FILENAME "/config.json"
 
