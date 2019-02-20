@@ -1,6 +1,16 @@
 # xfArduinoLibrary
 Collection of wrappers for some Arduino libraries. Purpose to make the reuse simpler
 
+Library contains:
+
+| Library   | Description  |   
+|-----------|--------------|
+|xfConfig   | Persistant configuration using ESP8266 filesystem with serialization to and from c++ struct 
+| xfMQTT    | Wrapper for PubSubClient to make the code easier and more readable. 
+| xfOTA | Wrapper for ArduinoOTA
+| xfWifiManager | Wrapper for WiFiManager with option to get parameters for MQTT in setup screen. Depends on xfConfig.
+
+
 ## xfConfig
 Library to save and retrieve configuration for ESP8266. The configuration is stored as a file in ESP8266 filesystem and can be read/saved using json or by using struct serialization. 
 
