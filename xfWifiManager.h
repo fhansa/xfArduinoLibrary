@@ -1,9 +1,11 @@
-/*
- *  xfWifiManager.h
+/*  xfArduinoLibrary - xfWiFiManager
+ *  Copyright Fredrik Santander 2019
+ *  MIT License
  * 
  *  Wrapper for WifiManager to add MQTT-configuration
  * 
  *  Usage:
+ *      see github
  * 
  *  TODO:
  *    - Make Wifi-reset configurable
@@ -14,12 +16,37 @@
 #include <ESP8266WebServer.h>
 #include "xfConfig.h"
 
-#define  XFMQTTCONFIGFILE "/mqttconfig.json"        // Name of config file to store mqtt-settings
-#define  DEFAULT_WIFI_PORT 8990                     // Portnumber for wifi reset commando
+#define  DEFAULT_WIFI_PORT 8990                                 // Portnumber for wifi reset commando
 
 #define MAX_LEN_DHCP    10
 #define MAX_LEN_IPADR   20
 
+// Structure for extended configuration
+struct extendedConfig_t {
+
+    // IP-settings
+    uint8_t dhcp;
+    String staticIP;
+    String gatewayIP;
+    String netmask;
+
+    // MQTT
+    String host;
+    int port;
+    String username;
+    String password;
+
+    XF_CONFIG(
+        XF_CONFIGITEM(dhcp, 1)
+        XF_CONFIGITEM(staticIP, "")
+        XF_CONFIGITEM(gatewayIP, "")
+        XF_CONFIGITEM(netmask, "")
+        XF_CONFIGITEM(host, "")
+        XF_CONFIGITEM(port, 0)
+        XF_CONFIGITEM(username, "")
+        XF_CONFIGITEM(password, "")
+    );
+};
 
 class xfWifiManager {
     protected:
@@ -27,37 +54,17 @@ class xfWifiManager {
         char ap_name[25];
         char ap_pwd[25];
 
-        // Properties for MQTT 
-        bool m_configMQTT;
-        char *m_mqttServer;
-        char *m_mqttPort;
-        char *m_mqttUsername;
-        char *m_mqttPassword;
-        char m_dhcp[MAX_LEN_DHCP];
-        char m_staticIp[MAX_LEN_IPADR];
-        char m_staticGateway[MAX_LEN_IPADR];
-
         // WifiServer to enable wifi-reset
         WiFiServer *m_wifiServer;
         void parseWebCall(WiFiClient client);
+        bool configMQTT;
     public:
         // Constructor, 
         //      Take Access Point credentials and flag indicating if mqtt should be configured or not as input
         xfWifiManager(char *apName, char *apPwd, bool configMQTT, bool allowStaticIp = true);
 
-        // Getter and setters for mqtt
-        char *mqttServer();
-        char *mqttPort();
-        char *mqttUsername();
-        char *mqttPassword();
-        void setMqttServer(const char *server);
-        void setMqttPort(const char *port);
-        void setMqttUsername(const char *username);
-        void setMqttPassword(const char *password);
-
-        void setDHCP(const char *dhcp);
-        void setStaticIp(const char *staticIp);
-        void setStaticGateway(const char *staticGateway);
+        // Configuration structure
+        extendedConfig_t configuration;
 
         void saveConfiguration();
         void readConfiguration();
@@ -65,9 +72,16 @@ class xfWifiManager {
         // Turn on and off wifi reset
         void allowReset(bool allow);
         bool allowStaticIp;
+        
         // Setup WiFi
         bool setupWifi(bool forceAP = false);
+        
+        // Reset WiFi
         void resetWifi();
+        
+        // Reset (Clear) Configuration
+        void resetConfiguration();
+
         // Loop function - always call this from loop()
         void handle();
 };

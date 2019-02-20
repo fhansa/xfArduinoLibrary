@@ -44,7 +44,8 @@ extern StaticJsonBuffer<512> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject(); \
     handleJson(json, 0); \
     return json; \  
-  }; \
+  }; 
+
 #define XF_CONFIGITEM(member, defaultValue) \
   if (mode == 1) { member = json[#member].success() ? json[#member].as<decltype(member)>() : defaultValue; } else { json[#member] = member; } 
 
