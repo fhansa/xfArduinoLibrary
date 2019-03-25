@@ -11,6 +11,9 @@
  *    - Make Wifi-reset configurable
  *    - Make Wifi-reset possible to exclude on compile time
  */
+#ifndef XFWIFIMANAGER
+#define XFWIFIMANAGER
+
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h> 
 #include <ESP8266WebServer.h>
@@ -85,3 +88,4 @@ class xfWifiManager {
         // Loop function - always call this from loop()
         void handle();
 };
+#endif

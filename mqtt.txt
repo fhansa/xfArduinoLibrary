@@ -1,0 +1,27 @@
+Discovery 
+
+home/binary_sensor/xftester/config
+
+{
+  "~":"home/xftestcustom",
+  "name":"xftest",
+  "unique_id":"xftest1000",
+  "state_topic":"~/set",
+  "payload_on":"on",
+  "payload_off":"off",
+  "availability_topic":"~/availability",
+  "payload_available":"online",
+  "payload_not_available":"offline",
+  "device_class":"motion",
+  "device" : {
+    "identifiers":"1234556789",
+    "connections" : [["mac", "02:5b:26:a8:dc:12"]],
+    "manufacturer" : "xf",
+    "model":"xfTestSensor",
+    "name":"xftest",
+    "sw_version":"1.1"
+  }
+}
+
+AVAILABILITY 
+home/xftestcustom/availability

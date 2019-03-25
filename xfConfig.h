@@ -2,13 +2,13 @@
  *  Copyright Fredrik Santander 2019
  *  MIT License
  * 
- *      Configuration for ESP8266. 
+ *      Configuration manager for ESP8266. 
  *      Library makes it possible to store and retrieve configuration. 
  *      Configuration is stored as json-file in ESP-filesystem. 
  *      Configuration can be serialized to and from a c++ struct using macros.
  * 
  *      Library contains a global object named xfConfig to access an instance 
- *      using the default filename (config.js)
+ *      using the default filename (config.js).
  * 
  *  TODO:
  *      - optimize memory allocation for ArduinoJson-buffer and filename 
