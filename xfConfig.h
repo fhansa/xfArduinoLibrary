@@ -1,3 +1,5 @@
+#ifndef XFCONFIG_H
+#define XFCONFIG_H
 /*  xfArduinoLibrary - xfConfig
  *  Copyright Fredrik Santander 2019
  *  MIT License
@@ -9,21 +11,33 @@
  * 
  *      Library contains a global object named xfConfig to access an instance 
  *      using the default filename (config.js).
+ *  
+ *      USAGE: 
+ *        // Example of how to enable serializing of a struct to json
+          struct config_t {
+            // Configuration properties
+            String someText;
+            int someNumber;
+
+            // Macro to enable serialization 
+            XF_CONFIG(
+              XF_CONFIGITEM(someText, "default text")
+              XF_CONFIGITEM(someNumber, 0)
+            )
+          };
  * 
- *  TODO:
- *      - optimize memory allocation for ArduinoJson-buffer and filename 
- *      - enable logging to other than serialized
- *      - option to turn off logging
- *      - better error handling (i.e. return bool from read/save)
+ *  // TODO: xfConfig - optimize memory allocation for ArduinoJson-buffer and filename 
+ *  // TODO: xfConfig - enable logging to other than serialized
+ *  // TODO: xfConfig - option to turn off logging
+ *  // TODO: xfConfig - better error handling (i.e. return bool from read/save)
  * 
  */
-#ifndef XFCONFIG_H
-#define XFCONFIG_H
+#include "xfHelper.h"
 #include <FS.h>
 #include <ArduinoJson.h>  
 
 /*
- *  Forward declarations
+ *      Forward declarations
  */
 class xfConfigClass;
 extern xfConfigClass xfConfig;
@@ -31,7 +45,8 @@ extern StaticJsonBuffer<512> jsonBuffer;
 
 /*
  *      Macros for serializing json <-> struct
- * 
+ *        XF_CONFIG to start definition of serialization  
+ *        XF_CONFIGITEM to make a property in stuct serializable
  */
 #define XF_CONFIG(...) \
   void handleJson(JsonObject &json, int mode) { \
@@ -48,6 +63,18 @@ extern StaticJsonBuffer<512> jsonBuffer;
 
 #define XF_CONFIGITEM(member, defaultValue) \
   if (mode == 1) { member = json[#member].success() ? json[#member].as<decltype(member)>() : defaultValue; } else { json[#member] = member; } 
+/*  DEBUG
+  { \
+    Serial.println(#member); \
+    if (mode == 1) {  \ 
+      if(json.containsKey(#member)) { \
+        member = json[#member].as<decltype(member)>(); \
+      } else { \
+        member = defaultValue; \
+      } \
+    } \
+  }
+*/
 
 #define XFCONFIG_DEFAULT_FILENAME "/config.json"
 
@@ -98,4 +125,4 @@ void xfConfigClass::saveConfig(T configStructure) {
   this->saveConfigFromJson(json);
 }
 
-#endif
+#endif // XFCONFIG_H

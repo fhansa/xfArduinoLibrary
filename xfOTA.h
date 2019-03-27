@@ -1,3 +1,5 @@
+#ifndef XFOTA_H
+#define XFOTA_H
 /*  xfArduinoLibrary - xfOTA
  *  Copyright Fredrik Santander 2019
  *  MIT License
@@ -14,8 +16,7 @@
  *    - extend logging
  *    - enable logging to mqtt
  */
-#ifndef XFOTA_H
-#define XFOTA_H
+
 
 #include <ArduinoOTA.h>
 
@@ -36,4 +37,4 @@ class xfOTA {
 
 // Make global single instance
 extern xfOTA xfOta;
-#endif
+#endif //XFOTA_H

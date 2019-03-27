@@ -4,11 +4,14 @@
  * 
  * 
  */
-#ifndef XFARDUINOLIBRARY 
-#define XFARDUINOLIBRARY
+#ifndef XFARDUINOLIBRARY_H
+#define XFARDUINOLIBRARY_H
+
+#include "xfHelper.h"
 #include "xfConfig.h"
 #include "xfMQTT.h"
 #include "xfOTA.h"
 #include "xfWifiManager.h"
+#include "xfMQTTDevice.h"
 
-#endif
+#endif // XFARDUINOLIBRARY_H

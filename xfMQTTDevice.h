@@ -1,129 +1,192 @@
-#include <arduino.h>
-#include <ArduinoJson.h>
-
-#include "xfMQTT.h"
-#include "xfConfig.h"
+#ifndef XFMQTTDEVICE_H
+#define XFMQTTDEVICE_H
 /*
+ *  xfMQTTDevice
+ *      Implementation of wrapper for Home Assistant-style 
+ *      MQTT devices. The wrapper will implement common functionality 
+ *      for a mqtt device and let user/developer create their own devices 
+ *      with a minimum of coding. 
+ * 
+ *      Documentation of MQTT device: 
+ *          https://www.home-assistant.io/docs/mqtt/discovery/
+ * 
+ *  Content:
+ *    xfMQTTDevice        
+ *      - Base class for a MQTT-device
+ *    xfMQTTBinarySensor  
+ *      - Implementation of Binary sensor
+ *        https://www.home-assistant.io/components/binary_sensor.mqtt/
+ *    xfMQTTLight         
+ *      - Implementation of MQTT light 
+ *        https://www.home-assistant.io/components/light.mqtt/
+ * 
+ * 
+ *  Usage: 
+ *      Implementation of your device is done by utilizing corresponding class. 
+ *      Each class exposes the neccessary properties, callbacks and methods to be able to 
+ *      completely implement a mqtt device. 
+ *      
+ *      Some information is required for all devices while other is based on type of device.  
+ *      
  *  Discovery:
  *      publish message on MQTT:
  *          <discovery-prefix>/<devicetype>/<name of device>/config
  *          Device type is specified in base class. 
  *          Discovery-prefix and name of device is specified by user
+ *  NOT IMPLEMETED
+ *      device portion of the discovery payload
+ *      json-attributes in discovery payload is not implemented
  * 
+ *  TODOS
  * 
+ *  // TODO: Create examples and tests for xfMQTTDevices
+ *  // TODO: Better setup of device to hide setupMQTT if xfWifiManager is used
+ *  // IDEA: Make everything more configurable (e.g. topics, connection etc...)
  * 
  */
 
+
+#include <arduino.h>
+#include <ArduinoJson.h>
+#include "xfMQTT.h"
+#include "xfConfig.h"
+
 // --------------------------------------------------------------------------
-//  Default values for all MQTT-properties
+//  Default values for MQTT-properties
 //
-#define DEF_AVAILABILITY_TOPIC                  "availability"
 #define DEF_UNIQUE_ID_PREFIX                    "xfdevice_"
 #define DEF_NAME_PREFIX                         "espdevice_"
 #define DEF_DISCOVERY_PREFIX                    "homeassistant"
-#define DEF_PAYLOAD_AVAILABILITY_ONLINE         "online"
-#define DEF_PAYLOAD_AVAILABILITY_OFFLINE        "offline"
 
-// NOT IMPLEMETED
-/*
-#define DEF_DEVICE_IDENTIFIERS                  ""
-#define DEF_DEVICE_CONNECTIONS                  ""
-#define DEF_DEVICE_MANUFACTURER                 ""
-#define DEF_DEVICE_MODEL                        ""
-#define DEF_DEVICE_NAME                         ""
-#define DEF_DEVICE_SW_VERSION                   ""
-
-#define DEF_JSON_ATTRIBUTES                     ""
-*/
-
+// --------------------------------------------------------------------------
+//  Base MQTT device - this instance cannot be directly used. Always use 
+//                     a specific sub class.
+// 
 class xfMQTTDevice {
     protected:
-
-        // Device type is specified in sub class
+        // Device type must be specified in sub class
+        // Corresponds to Home Assistant device type 
         virtual String getDeviceType();
 
+        // Reference to xfMQTT to execute all messaging
+        xfMQTT *m_mqtt;
+
     public: 
+        // MQTT 
+        void setupMQTT(char *host, int port, char *username, char *password);
+        void messageLoop();
+        String mqttBaseTopic;
+
         // Discovery properties
         String discoveryPrefix;
-
+        virtual void getDiscoveryPayload(JsonObject& json); // Always call parent when overridden!!!
+        void publishDiscovery();
 
         // Device properties
         String unique_id;
         String name;
 
-        // Reference to xfMQTT to execute all messaging
-        xfMQTT *m_mqtt;
-
-        // Topics
-        String baseTopic;
-        String availability_topic;
-        String availability_online;
-        String availability_offline;
-
-        
-        // Publish discovery to Home Assistant
-        void publishDiscovery();
-        virtual void populateJson(JsonObject& json);
-
         // Availability 
         void publishAvailability();
 
-
+        // Construction Time again
         xfMQTTDevice(char *baseTopic, char *deviceName, char *discoveryPrefix);
-        xfMQTTDevice(char *baseTopic, char *deviceName) : xfMQTTDevice(baseTopic, deviceName, baseTopic) {};
-        xfMQTTDevice(char *baseTopic) : xfMQTTDevice(baseTopic, DEF_NAME_PREFIX, baseTopic) {};
+        xfMQTTDevice(char *baseTopic, char *deviceName) :
+            xfMQTTDevice(baseTopic, deviceName, baseTopic) {};
+        xfMQTTDevice(char *baseTopic) :
+            xfMQTTDevice(baseTopic, DEF_NAME_PREFIX, baseTopic) {};
+
+        // Actions methods - triggered from client
         void availabilityOn();
         void availabilityOff();
 
-
-
 };
 
 
-#define DEF_STATE_TOPIC              "state"
-#define DEF_PAYLOAD_STATE_ON         "on"
-#define DEF_PAYLOAD_STATE_OFF        "off"
-
+// --------------------------------------------------------------------------
+//  Binary Sensor
+//      see https://www.home-assistant.io/components/binary_sensor.mqtt/
+//
+//      Simple sensor that reports a binary state (i.e. on/off, open/close, active/inactive)
+// 
 class xfMQTTBinarySensor : public xfMQTTDevice {
     public:
+        // Specify the device type
         virtual String getDeviceType();
-        xfMQTTBinarySensor(char *baseTopic, char *deviceName, char *discoveryPrefix); // : xfMQTTDevice(baseTopic, deviceName, discoveryPrefix) {};
-        xfMQTTBinarySensor(char *baseTopic, char *deviceName) : xfMQTTBinarySensor(baseTopic, deviceName, baseTopic) {};
-        xfMQTTBinarySensor(char *baseTopic) : xfMQTTBinarySensor(baseTopic, DEF_NAME_PREFIX, baseTopic) {};
 
-        virtual void populateJson(JsonObject& json);
+        // Create discovery payload
+        virtual void getDiscoveryPayload(JsonObject& json);
 
+        // Construction Time again
+        xfMQTTBinarySensor(char *baseTopic, char *deviceName, char *discoveryPrefix); 
+        xfMQTTBinarySensor(char *baseTopic, char *deviceName) : 
+            xfMQTTBinarySensor(baseTopic, deviceName, baseTopic) {};
+        xfMQTTBinarySensor(char *baseTopic) : 
+            xfMQTTBinarySensor(baseTopic, DEF_NAME_PREFIX, baseTopic) {};
+
+        // *** Binary Sensor specific properties ***
+        // State 
         bool state;
-        String stateTopic;
-        String payload_state_on;
-        String payload_state_off;
+        void changeState(bool state); 
 
+        // Device class (type of binary sensor https://www.home-assistant.io/components/binary_sensor/)
         String device_class;
 
 
-        void changeState(bool state);
-    
 };
 
+// --------------------------------------------------------------------------
+//  Light
+//      see https://www.home-assistant.io/components/light.mqtt/
+//
+//      Complete Light device. Extends a binary sensor
+// 
+class xfMQTTLight : xfMQTTBinarySensor {
+    public:
+        // Specify the device type
+        virtual String getDeviceType();
 
-class xfMQTTLight : xfMQTTDevice {
-    // State on/off command-topic
+        // Construction Time again
+        xfMQTTLight(char *baseTopic, char *deviceName, char *discoveryPrefix); 
+        xfMQTTLight(char *baseTopic, char *deviceName) : 
+            xfMQTTLight(baseTopic, deviceName, baseTopic) {};
+        xfMQTTLight(char *baseTopic) : 
+            xfMQTTLight(baseTopic, DEF_NAME_PREFIX, baseTopic) {};
 
-    // Brightness 0-255 brightness_topic
-    // brightness_scale??
+        // Create discovery payload
+        virtual void getDiscoveryPayload(JsonObject& json);
 
-    // color_temp_state_topic
+        // *** Light properties ***
 
-    // hs_command_topic
+        // TODO: Add actions for Light
 
-    // white_value_command_topic
+        // command topic
+        String commandTopic;
 
-    // xy_command_topic
+        // Brightness
+        bool enableBrightness;
+        int brightness_scale;
+        
+        // Color temp
+        bool enableColorTemp;
+        
+        // Hue Saturation
+        bool enableHueSaturation;
 
-    // Rgb 0-255, 0-255, 0-255
+        // White Value
+        bool enableWhiteValue;
+        int whiteValueScale;
 
-    // Effect <custom>
+        // XY Color
+        bool enableXY;
 
-    // List of effects
+        // RGB Color
+        bool enableRGB;
+
+        // Effect <custom>
+        bool enableEffects;
+        String effectList;
 
 };
+
+#endif // XFMQTTDEVICE_H

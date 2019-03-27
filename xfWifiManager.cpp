@@ -1,4 +1,3 @@
-
 #include "xfWifiManager.h"
 
 #define  XFEXTENDEDCONFIGFILE "./xfextendedconfig.json"         // Name of config file to store mqtt-settings
@@ -36,15 +35,16 @@ bool xfWifiManager::setupWifi(bool forceAP) {
     wifiMgr.setSaveConfigCallback([]() { saveConfig = true; } );
 
     // get configuration 
-    if(configMQTT || allowStaticIp)
+    if(configMQTT || allowStaticIp) {
+      xfHelper::xfdebug("xfWifiMgr* Reading extended config");
       this->readConfiguration();
+    }
 
     //
     //  Adding extra parameters for the setup screen
     //
     String dhcp;
     dhcp = configuration.dhcp == 1 ? "YES" : "NO";
-    Serial.println(configuration.dhcp);
     WiFiManagerParameter param_dhcp("DHCP", "DHCP", dhcp.c_str() , 10);
     WiFiManagerParameter param_static_ip("staticip", "static ip", configuration.staticIP.c_str(), 20);
     WiFiManagerParameter param_static_gateway("gateway", "static gateway", configuration.gatewayIP.c_str(), 20);
@@ -74,17 +74,17 @@ bool xfWifiManager::setupWifi(bool forceAP) {
     //  Do the autoconnect magic....
     //
     if(forceAP) {
-        Serial.println("Entering setup mode");
+        xfHelper::xfdebug("xfWifiMgr* Forcing AP mode");
         if (!wifiMgr.startConfigPortal(ap_name, ap_pwd)) {
-            Serial.println("failed to connect and hit timeout");
+            xfHelper::xfdebug("xfWifiMgr* ERROR: failed to connect and hit timeout");
             delay(3000);
             ESP.reset();
             delay(5000);
         }
     } else {
-        Serial.println(dhcp);
+        xfHelper::xfdebug("xfWifiMgr* Connect...");        
         if(this->allowStaticIp && configuration.dhcp != 1) {
-            Serial.println("Using static IP");
+            xfHelper::xfdebug("xfWifiMgr* Using static IP");
             IPAddress _ip, _gw, _sn;
             _ip.fromString(configuration.staticIP);
             _gw.fromString(configuration.gatewayIP);
@@ -92,7 +92,7 @@ bool xfWifiManager::setupWifi(bool forceAP) {
             wifiMgr.setSTAStaticIPConfig(_ip, _gw, _sn);
         } 
         if(!wifiMgr.autoConnect(ap_name, ap_pwd)) {
-            Serial.println("failed to connect and hit timeout");
+            xfHelper::xfdebug("xfWifiMgr* ERROR: failed to connect and hit timeout");
             delay(3000);
             ESP.reset();      //reset and try again, or maybe put it to deep sleep
             delay(5000);
@@ -177,7 +177,7 @@ void xfWifiManager::parseWebCall(WiFiClient client) {
 void xfWifiManager::allowReset(bool allow) {
   if (allow) {
     // Setup webserver
-      Serial.print("Allowing reset on port:");
+      xfHelper::xfdebug("xfWifiMgr* Allowing reset on port:");
       Serial.println(DEFAULT_WIFI_PORT);
       m_wifiServer = new WiFiServer(DEFAULT_WIFI_PORT);
       m_wifiServer->begin();

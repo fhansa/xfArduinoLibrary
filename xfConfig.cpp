@@ -8,7 +8,7 @@ StaticJsonBuffer<512> jsonBuffer;
 //  Create error json object
 // 
 JsonObject &xfConfigClass::errorJson() {
-    DynamicJsonBuffer jsonBuffer;
+    //DynamicJsonBuffer jsonBuffer;
     JsonObject &error = jsonBuffer.createObject();
     error["msg"] = "Error";
     return error;
@@ -26,17 +26,15 @@ xfConfigClass::xfConfigClass(char *filename) {
 //
 JsonObject &xfConfigClass::readConfigAsJson() {
 
-  Serial.println("Reading configuration");
-  Serial.println(m_filename);
+  xfHelper::xfdebug("xfConfig* Reading configuration");
   if(!SPIFFS.begin()) {
-    Serial.println("ERROR - Cannot mount FS.");
+    xfHelper::xfdebug("xfConfig* ERROR - Cannot mount FS.");
     return errorJson();
   }
 
   File configFile = SPIFFS.open(m_filename, "r");
   if(!configFile) {
-    Serial.print("ERROR - Cannot open ");
-    Serial.println(m_filename);
+    xfHelper::xfdebug("xfConfig* ERROR - Cannot open %s", m_filename);
     return errorJson();
   }
 
@@ -49,11 +47,11 @@ JsonObject &xfConfigClass::readConfigAsJson() {
   JsonObject& json = jsonBuffer.parseObject(buf.get());
 
   if(!json.success()) {
-    Serial.println("ERROR - Cannot parse json");
+    xfHelper::xfdebug("xfConfig* ERROR - Cannot parse json");
     return errorJson();
   }
   json.printTo(Serial);
-  Serial.println("");
+  xfHelper::xfdebug("xfConfig* EOF Read Config");
 
   configFile.close()    ;
 
@@ -64,11 +62,31 @@ JsonObject &xfConfigClass::readConfigAsJson() {
 //  Save config 
 //
 void xfConfigClass::saveConfigFromJson(JsonObject &json) {
-    Serial.println("Saving config");
+    xfHelper::xfdebug("xfConfig*  Saving configuration...");
     File configFile = SPIFFS.open(m_filename, "w");
     if (!configFile) {
-      Serial.println("failed to open config file for writing");
+      xfHelper::xfdebug("xfConfig*  Error when opening %s for writing.", m_filename);
+    }
+    if (XFDEBUG_ON) {
+      json.printTo(Serial);
+      Serial.println("");
     }
     json.printTo(configFile);
     configFile.close();
+}
+
+// 
+//  Purge all content (i.e. delet all files)
+//  
+void xfConfigClass::purgeFS() {
+  xfHelper::xfdebug("xfConfig*  Purging filesystem...");
+  SPIFFS.format();
+  xfHelper::xfdebug("xfConfig*  Purged");
+  
+/*  Dir dir = SPIFFS.openDir("/");
+  while (dir.next()) {
+    xfHelper::xfdebug("xfConfig*  purgeFS - Removing %s", dir.fileName().c_str());
+    SPIFFS.remove(dir.fileName());
+   }
+*/
 }

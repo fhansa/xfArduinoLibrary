@@ -1,3 +1,5 @@
+#ifndef XFWIFIMANAGER_H
+#define XFWIFIMANAGER_H
 /*  xfArduinoLibrary - xfWiFiManager
  *  Copyright Fredrik Santander 2019
  *  MIT License
@@ -7,13 +9,10 @@
  *  Usage:
  *      see github
  * 
- *  TODO:
- *    - Make Wifi-reset configurable
- *    - Make Wifi-reset possible to exclude on compile time
+ *  // TODO: Make Wifi-reset configurable
+ *  // TODO: Make Wifi-reset possible to exclude on compile time
  */
-#ifndef XFWIFIMANAGER
-#define XFWIFIMANAGER
-
+#include "xfHelper.h"
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h> 
 #include <ESP8266WebServer.h>
@@ -41,8 +40,8 @@ struct extendedConfig_t {
 
     XF_CONFIG(
         XF_CONFIGITEM(dhcp, 1)
-        XF_CONFIGITEM(staticIP, "")
-        XF_CONFIGITEM(gatewayIP, "")
+        XF_CONFIGITEM(staticIP, String(""))
+        XF_CONFIGITEM(gatewayIP, String(""))
         XF_CONFIGITEM(netmask, "")
         XF_CONFIGITEM(host, "")
         XF_CONFIGITEM(port, 0)
@@ -88,4 +87,4 @@ class xfWifiManager {
         // Loop function - always call this from loop()
         void handle();
 };
-#endif
+#endif // XFWIFIMANAGER_H
