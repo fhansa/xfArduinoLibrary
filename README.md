@@ -12,6 +12,9 @@ Library contains:
 | xfMQTT    | Wrapper for PubSubClient to make the code easier and more readable. 
 | xfOTA | Wrapper for ArduinoOTA
 | xfWifiManager | Wrapper for WiFiManager with option to get parameters for MQTT in setup screen. Depends on xfConfig.
+| xfMQTTDevice | Implementation of MQTT device support (home assistant style). Contains implementation of various HomeAssistant device; Light, Binary Sensor
+
+
 
 
 ## xfConfig
@@ -82,13 +85,66 @@ For more documentation see ArduinoOTA.
 
 ### Usage
 ```
-    // Declare and instansiate
+    // Create instance 
     xfOTA ota;
 
-    // Setup OTA
+    // Setup OTA with OTA host name and password
     ota.setup("ESP8266", "otapassword");
 
     // In loop() 
     ota.loop();
 
+```
+
+## xfMQTTDevice 
+Base class for Home Assistant MQTT-devices
+
+## xfMQTTBinarySensor
+Implementation of home assistant binary_sensor. 
+
+```
+    // Create device 
+    char *base = "home";            // base used for all topics 
+    char *name = "mysensor";        // name of device
+    char *disc = "homeassistant";   // discovery prefix 
+    xfMQTTBinarySensor device = xfBinarySensor(base, name, disc);
+
+    // Set MQTT-properties
+    char *host = "192.168.1.?";     // IP of MQTT-broker
+    int port = 1883;                // port of MQTT-broker
+    char *usr = "someone";          // User for MQTT-broker
+    char *pwd = "verysecret"        // pwd for MQTT-broker
+    device.setupMQTT(hosty, port, usr, pwd);
+```
+After setup following MQTT retained messages have been sent to inform home assistant about the device characteristics and to say that device is available. 
+For details of payload see https://www.home-assistant.io/docs/mqtt/discovery/ and https://www.home-assistant.io/components/binary_sensor.mqtt/ 
+```
+    // Configuration message
+    topic: home/binary_sensor/mysensor/config
+    payload: {
+        "uniq_id":"mysensor1002",
+        "name":"mysensor",
+        "~":"home/mysensor",
+        "avty_t":"~/availability",
+        "pl_avail":"online",
+        "pl_not_avail":"online",
+        "stat_t":"~/state",
+        "pl_on":"on",
+        "pl_off":"off"
+    }
+
+    // Availabilty message
+    topic: home/mySensor/availability
+    payload: online
+```
+
+Whenever the device wants to change the state (e.g. motion detected, door opened, switch turned on, ...)
+```
+    // Trigger change of state 
+    device.changeState(true);       // Set state to on
+```
+Results in following MQTT-message
+```
+    topic: home/mySensor/state
+    payload: on
 ```

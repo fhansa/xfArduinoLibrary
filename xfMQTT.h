@@ -1,7 +1,9 @@
 #ifndef XFMQTT_H
 #define XFMQTT_H
-/*
- *  xfMQTT.h
+/*  xfArduinoLibrary 
+ *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
+ *  MIT License
  * 
  *  Wrapper for PubSubClient-library
  *  Purpose to make MQTT simple to use with separate callbacks for each subscribe.

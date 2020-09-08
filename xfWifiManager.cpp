@@ -1,3 +1,8 @@
+/*  xfArduinoLibrary 
+ *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
+ *  MIT License
+ */
 #include "xfWifiManager.h"
 
 #define  XFEXTENDEDCONFIGFILE "./xfextendedconfig.json"         // Name of config file to store mqtt-settings
@@ -116,12 +121,9 @@ bool xfWifiManager::setupWifi(bool forceAP) {
       }
 
       saveConfiguration();
-
-    }
-
-
-    Serial.println("local ip");
-    Serial.println(WiFi.localIP());
+    
+  }
+  xfHelper::xfdebug("xfWifiMgr* Setup WiFi done!");
 }
 
 //

@@ -1,6 +1,10 @@
 #ifndef XFMQTTDEVICE_H
 #define XFMQTTDEVICE_H
-/*
+/*  xfArduinoLibrary 
+ *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
+ *  MIT License
+ * 
  *  xfMQTTDevice
  *      Implementation of wrapper for Home Assistant-style 
  *      MQTT devices. The wrapper will implement common functionality 
@@ -50,6 +54,7 @@
 #include <ArduinoJson.h>
 #include "xfMQTT.h"
 #include "xfConfig.h"
+#include "xfWifiManager.h"
 
 // --------------------------------------------------------------------------
 //  Default values for MQTT-properties
@@ -73,6 +78,8 @@ class xfMQTTDevice {
 
     public: 
         // MQTT 
+        void setupMQTT(wifiConfig_t config);
+        void setupMQTT(String host, int port, String username, String password);
         void setupMQTT(char *host, int port, char *username, char *password);
         void messageLoop();
         String mqttBaseTopic;

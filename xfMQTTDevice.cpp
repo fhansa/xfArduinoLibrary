@@ -1,3 +1,8 @@
+/*  xfArduinoLibrary 
+ *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
+ *  MIT License
+ */
 #include "xfMQTTDevice.h"
 
 // Instance of WiFiClient to be used by MQTT
@@ -23,7 +28,7 @@ WiFiClient  g_wifi;
 #define T_COLOR_TEMP_COMMAND    "~/clr_temp/set"
 #define T_COLOR_TEMP_STATE      "~/clr_temp/state"
 #define T_EFFECT_COMMAND        "~/fx/set"
-#define T_EFFECT_STATE          "~/fx/state"
+#define T_EFFECT_STATE           "~/fx/state"
 #define T_HUE_SAT_COMMAND        "~/hs/set"
 #define T_HUE_SAT_STATE          "~/hs/state"
 #define T_RGB_COMMAND            "~/rgb/set"
@@ -31,8 +36,8 @@ WiFiClient  g_wifi;
 #define T_WHITE_VALUE_COMMAND    "~/whit_val/set"
 #define T_WHITE_VALUE_STATE      "~/whit_val/state"
 #define DEF_WHITE_VALUE_SCALE    255
-#define T_XY_COMMAND            "~/xy/set"
-#define T_XY_STATE              "~/xy/state"
+#define T_XY_COMMAND              "~/xy/set"
+#define T_XY_STATE                "~/xy/state"
 
 // --------------------------------------------------------------------------
 //  xfMQTTDevice
@@ -46,6 +51,15 @@ xfMQTTDevice::xfMQTTDevice(char *baseTopic, char *deviceName, char *discoveryPre
   // TODO:  Make unique id random
   unique_id = strcat(DEF_UNIQUE_ID_PREFIX, "1002"); 
 }
+
+void xfMQTTDevice::setupMQTT(wifiConfig_t config) {
+  this->setupMQTT(config.host, config.port, config.username, config.password);
+}
+
+void xfMQTTDevice::setupMQTT(String host, int port, String username, String password) {
+  this->setupMQTT(host.c_str(), port, username.c_str(), password.c_str());
+}
+
 
 // Create and setup MQTT
 void xfMQTTDevice::setupMQTT(char *host, int port, char *username, char *password) {

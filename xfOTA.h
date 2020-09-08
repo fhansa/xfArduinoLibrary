@@ -1,7 +1,8 @@
 #ifndef XFOTA_H
 #define XFOTA_H
-/*  xfArduinoLibrary - xfOTA
+/*  xfArduinoLibrary 
  *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
  *  MIT License
  * 
  *  Contains helper methods to setup ArduinoOTA. 

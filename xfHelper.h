@@ -1,6 +1,10 @@
 #ifndef XFHELPER_HPP
 #define XFHELPER_HPP
-
+/*  xfArduinoLibrary 
+ *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
+ *  MIT License
+ */
 #include <stdarg.h>
 #include <hardwareSerial.h>
 

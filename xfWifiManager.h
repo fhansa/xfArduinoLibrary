@@ -1,7 +1,8 @@
 #ifndef XFWIFIMANAGER_H
 #define XFWIFIMANAGER_H
-/*  xfArduinoLibrary - xfWiFiManager
+/*  xfArduinoLibrary 
  *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
  *  MIT License
  * 
  *  Wrapper for WifiManager to add MQTT-configuration
@@ -11,12 +12,18 @@
  * 
  *  // TODO: Make Wifi-reset configurable
  *  // TODO: Make Wifi-reset possible to exclude on compile time
+ *  // RESTRUCTURE: REMAKE TO GET RID OF WiFiManager.h and to make UI nicer
+ *  // TODO: Add parameters for baseTopic and discoveryPrefix
+ * 
+ * 
  */
-#include "xfHelper.h"
 #include <ESP8266WiFi.h>
 #include <WiFiManager.h> 
 #include <ESP8266WebServer.h>
+#include "xfHelper.h"
+#include "xfMQTT.h"
 #include "xfConfig.h"
+#include "xfWifiManager.h"
 
 #define  DEFAULT_WIFI_PORT 8990                                 // Portnumber for wifi reset commando
 
@@ -24,7 +31,7 @@
 #define MAX_LEN_IPADR   20
 
 // Structure for extended configuration
-struct extendedConfig_t {
+struct wifiConfig_t {
 
     // IP-settings
     uint8_t dhcp;
@@ -60,14 +67,14 @@ class xfWifiManager {
         WiFiServer *m_wifiServer;
         void parseWebCall(WiFiClient client);
         bool configMQTT;
+
     public:
         // Constructor, 
         //      Take Access Point credentials and flag indicating if mqtt should be configured or not as input
         xfWifiManager(char *apName, char *apPwd, bool configMQTT, bool allowStaticIp = true);
 
-        // Configuration structure
-        extendedConfig_t configuration;
-
+        // Configuration 
+        wifiConfig_t configuration;
         void saveConfiguration();
         void readConfiguration();
 

@@ -1,7 +1,8 @@
 #ifndef XFCONFIG_H
 #define XFCONFIG_H
-/*  xfArduinoLibrary - xfConfig
+/*  xfArduinoLibrary 
  *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
  *  MIT License
  * 
  *      Configuration manager for ESP8266. 

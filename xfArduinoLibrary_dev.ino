@@ -1,10 +1,14 @@
-/*
- *  Build and test scetch used when developing the xfArduinoLibrary
- *  
- *  Validate test by reading serial output in conjunction with the 
- *  comments in the code. 
+/*  xfArduinoLibrary 
+ *  Copyright Fredrik Santander 2019
+ *  https://github.com/fhansa/xfArduinoLibrary
+ *  MIT License
  * 
- *  Haven't found a better way to reliable test arduino library code 
+ *    Build and test scetch used when developing the xfArduinoLibrary.
+ *    Validate test by reading serial output in conjunction with the 
+ *    comments in the code. 
+ * 
+ *    Haven't found a better way to reliable test arduino library code. 
+ *    If you do please send me a note!! 
  * 
  */
 #include "xfArduinoLibrary.h"
@@ -37,7 +41,7 @@ void setup() {
   }
   // 2) Setup Wifi using wifiMagr including getting MQTT-properties
   Serial.println("2) *** Setup Wifi using xfWifiManager");
-  wifiMgr.setupWifi();
+    wifiMgr.setupWifi();
 
   // 3) xfBinarySensor using wifiManager settings
   // 
@@ -45,6 +49,9 @@ void setup() {
   //  3b) Publish discovery
   //  3c) Publish state
   //  3d) Recieve notification
+  device.setupMQTT(wifiMgr.configuration);
+
+  device.changeState(true);
 
   // 4) xfConfig
   //  4a) Enable serializable struct and save values
@@ -56,14 +63,11 @@ void setup() {
 long t = 0;
 bool state = true;
 void loop() {
-  // Make sure device handles messages (i.e. mqtt messages)
 
-  //int val = digitalRead(D1);  // read input value
-/*  if (millis() -t > 3000) {
+  if (millis() -t > 3000) {
     t = millis();
     state = !state;
     device.changeState(state);
   }
-*/
   delay(100);
 }
